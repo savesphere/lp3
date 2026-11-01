@@ -1,0 +1,84 @@
+import pandas as pd
+import numpy as np
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+
+# Load dataset
+df = pd.read_csv(r"C:\Users\purva\OneDrive\Desktop\lp3\dataset\diabetes.csv")
+
+print("Dataset Shape:", df.shape)
+print("\nFirst 5 Rows:")
+print(df.head())
+
+# Check missing values
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+print("\nTotal Missing Values:", df.isnull().sum().sum())
+
+# Check target distribution
+print("\nTarget Counts:")
+print(df["Outcome"].value_counts())
+
+
+
+
+
+# Separate features and target
+X = df.drop("Outcome", axis=1)
+y = df["Outcome"]
+
+# Replace invalid zero measurements with missing values
+cols = ["Glucose", "BloodPressure", "SkinThickness",
+        "Insulin", "BMI"]
+
+X[cols] = X[cols].replace(0, np.nan)
+
+# Handle missing values using column mean
+X = X.fillna(X.mean())
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Feature scaling
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Apply KNN algorithm
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
+
+# Prediction
+y_pred = knn.predict(X_test)
+
+
+
+
+
+# Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:\n", cm)
+
+# Accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print("\nAccuracy:", round(accuracy * 100, 2), "%")
+
+# Error Rate
+error_rate = 1 - accuracy
+print("Error Rate:", round(error_rate * 100, 2), "%")
+
+# Precision
+precision = precision_score(y_test, y_pred, zero_division=0)
+print("Precision:", round(precision, 2))
+
+# Recall
+recall = recall_score(y_test, y_pred, zero_division=0)
+print("Recall:", round(recall, 2))
+
+print("\nKNN Model Evaluation Completed Successfully!")

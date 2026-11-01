@@ -1,0 +1,92 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# Load dataset
+df = pd.read_csv(r"C:\Users\purva\OneDrive\Desktop\lp3\dataset\emails.csv\emails.csv")
+
+print("Dataset shape:", df.shape)
+display(df.head())
+df.info()
+
+
+
+
+
+
+# Separate features and target
+X = df.iloc[:, 1:-1]
+y = df.iloc[:, -1]
+
+# Handle missing values
+X = X.fillna(0)
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Feature scaling
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# KNN Classifier
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
+knn_pred = knn.predict(X_test)
+
+# SVM Classifier
+svm = SVC(kernel="linear")
+svm.fit(X_train, y_train)
+svm_pred = svm.predict(X_test)
+
+
+
+
+
+# KNN Results
+print("--- KNN RESULTS ---")
+print("Accuracy:", round(accuracy_score(y_test, knn_pred) * 100, 2), "%")
+print("Confusion Matrix:\n", confusion_matrix(y_test, knn_pred))
+print(classification_report(y_test, knn_pred, zero_division=0))
+
+# SVM Results
+print("\n--- SVM RESULTS ---")
+print("Accuracy:", round(accuracy_score(y_test, svm_pred) * 100, 2), "%")
+print("Confusion Matrix:\n", confusion_matrix(y_test, svm_pred))
+print(classification_report(y_test, svm_pred, zero_division=0))
+
+# Performance Comparison
+knn_accuracy = accuracy_score(y_test, knn_pred) * 100
+svm_accuracy = accuracy_score(y_test, svm_pred) * 100
+
+print("\n--- PERFORMANCE COMPARISON ---")
+print("KNN Accuracy:", round(knn_accuracy, 2), "%")
+print("SVM Accuracy:", round(svm_accuracy, 2), "%")
+
+if knn_accuracy > svm_accuracy:
+    print("KNN performs better.")
+elif svm_accuracy > knn_accuracy:
+    print("SVM performs better.")
+else:
+    print("Both models have equal accuracy.")
+
+
+
+
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# KNN Confusion Matrix
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, knn_pred))
+
+# SVM Confusion Matrix
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, svm_pred))
+
